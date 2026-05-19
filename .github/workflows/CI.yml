@@ -1,0 +1,42 @@
+name: CI
+on: push
+jobs:
+  test-frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+    - name: Get code
+      uses: actions/checkout@v6
+    - name: Install NodeJS
+      uses: actions/setup-node@v6
+    - name : Install dependencies
+      run: npm ci
+    - name: Lint project
+      run: npm run lint
+    - name: Run tests
+      run: npm run test
+  test-backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+    - name: Get code
+      uses: actions/checkout@v6
+    - name: Install JDK
+      uses: actions/setup-java@v5
+      with:
+        distribution: 'temurin'
+        java-version: '21'
+    - name: Start database
+      run: docker compose up -d
+    - name: Wait for database
+      run: sleep 10
+    - name: Lint project
+      run: mvn spotless:check
+    - name: Run Tests
+      run: mvn test
+    - name: Stop database
+      run: docker compose down
